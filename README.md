@@ -1,5 +1,7 @@
 # Tests Playwright KosmoPOS
-
+npx playwright test tests/tc01.spec.ts --headed
+npx playwright test tests/tc02.spec.ts --headed
+npx playwright test tests/tc03.spec.ts --headed
 ## Configuration
 
 Copier `.env.example` dans `.env` et renseigner les variables suivantes:

@@ -1,3 +1,10 @@
+# Commande pour lancer test test
+npx playwright test
+
+# Commande pour lister les tests
+npx playwright test --list
+
+
 # Tests Playwright KosmoPOS
 npx playwright test tests/tc01.spec.ts --headed
 npx playwright test tests/tc02.spec.ts --headed

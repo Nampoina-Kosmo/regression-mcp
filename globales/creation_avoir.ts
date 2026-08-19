@@ -5,18 +5,38 @@ export type CreationAvoir = {
   livraisonAttendue?: number;
 };
 
+export type OptionsCreationAvoir = {
+  skipInvoiceLookup?: boolean;
+};
+
 export async function creerAvoirDepuisFacture(
   page: Page,
   donnees: CreationAvoir,
+  options: OptionsCreationAvoir = {},
 ): Promise<string> {
-  await page.goto('/admin/invoices');
+  if (!options.skipInvoiceLookup) {
+    await page.goto('/admin/invoices');
 
-  const recherche = page.getByRole('searchbox').last();
-  await recherche.fill(donnees.titreDevis);
+    const boutonFiltrer = page.getByRole('button', { name: /Filtrer par|Filter by/i }).first();
+    if (await boutonFiltrer.count() > 0) {
+      await boutonFiltrer.click();
 
-  const ligneFacture = page.getByRole('row').filter({ hasText: donnees.titreDevis }).first();
-  await expect(ligneFacture).toBeVisible({ timeout: 15000 });
-  await ligneFacture.getByRole('link', { name: /^FCT-/ }).click();
+      const boutonClearAll = page.getByRole('button', { name: /Clear All|Effacer tout|Tout effacer/i }).first();
+      if (await boutonClearAll.count() > 0) {
+        await boutonClearAll.click();
+      }
+
+      await page.locator('body').click({ position: { x: 10, y: 10 } });
+    }
+
+    const recherche = page.getByRole('searchbox').last();
+    await recherche.fill(donnees.titreDevis);
+
+    const ligneFacture = page.getByRole('row').filter({ hasText: donnees.titreDevis }).first();
+    await expect(ligneFacture).toBeVisible({ timeout: 15000 });
+    await ligneFacture.getByRole('link', { name: /^FCT-/ }).click();
+  }
+
   await expect(page).toHaveURL(/\/admin\/invoices#\d+/);
   await expect(page.getByRole('heading', { name: /^FCT-/ }).first()).toBeVisible({
     timeout: 15000,
@@ -75,7 +95,7 @@ async function lireMontantLigne(ligne: Locator): Promise<number> {
   return montant;
 }
 
-async function lireLivraison(page: Page): Promise<number> {
+export async function lireLivraison(page: Page): Promise<number> {
   const ligne = page
     .getByRole('cell', { name: 'Livraison', exact: true })
     .last()

@@ -16,6 +16,17 @@ export async function accepterDevis(
   const email = donnees.email ?? 'nampoina.kosmo@signarama.fr';
 
   await page.goto('/admin/proposals');
+
+  const boutonFiltrer = page.getByText(/Filtrer Par|Filtrer par/i).first();
+  if (await boutonFiltrer.count() > 0) {
+    await boutonFiltrer.click();
+    const boutonClearAll = page.getByRole('button', { name: /Clear All|Effacer tout|Tout effacer/i }).first();
+    if (await boutonClearAll.count() > 0) {
+      await boutonClearAll.click();
+      await page.locator('body').click({ position: { x: 10, y: 10 } });
+    }
+  }
+
   const recherche = page.getByPlaceholder('Rechercher :');
   await recherche.fill(donnees.titre);
 

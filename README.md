@@ -45,3 +45,21 @@ test('créer un devis', async ({ page }) => {
 ```
 
 La fonction sélectionne l’entreprise, l’attribution, l’origine, le produit et les frais configurés, vérifie la cohérence entre le Total HT et le Total TTC, puis enregistre le devis.
+
+## Conversion d’un devis en commande
+
+```ts
+import { convertirDevisEnCommande } from '../globales/conversion_devis_commande';
+
+test('convertir le devis en commande', async ({ page }) => {
+  await authentifierAdmin(page);
+
+  const devisUrl = await creerDevis(page, { titre: 'TEST-commande' });
+  await convertirDevisEnCommande(page, {
+    devisUrl,
+    titre: 'TEST-commande',
+  });
+});
+```
+
+L’application ne propose pas de bouton direct de conversion sur la fiche du devis. Le helper ouvre le formulaire de commande, reprend le client, le titre, l’origine et le produit du devis accepté, puis enregistre la commande.

@@ -37,7 +37,7 @@ export async function creerAvoirDepuisFacture(
     await ligneFacture.getByRole('link', { name: /^FCT-/ }).click();
   }
 
-  await expect(page).toHaveURL(/\/admin\/invoices#\d+/);
+  await expect(page).toHaveURL(/\/admin\/invoices(?:\/list_invoices\/\d+)?(?:#\d+)?/);
   await expect(page.getByRole('heading', { name: /^FCT-/ }).first()).toBeVisible({
     timeout: 15000,
   });

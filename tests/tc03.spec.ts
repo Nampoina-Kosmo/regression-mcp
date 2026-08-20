@@ -12,7 +12,7 @@ test('TC03 - Vérification du montant HT sur un avoir avec livraison', async ({ 
   await authentifierAdmin(page);
 
   const { numeroFacture, livraison } = await trouverFactureAvecLivraison(page);
-  await expect(page).toHaveURL(/\/admin\/invoices#\d+/, { timeout: 15000 });
+  await expect(page).toHaveURL(/\/admin\/invoices(?:\/list_invoices\/\d+)?(?:#\d+)?/, { timeout: 15000 });
 
   const totalHtFacture = await lireTotalHT(page);
 

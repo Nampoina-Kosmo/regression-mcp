@@ -27,7 +27,7 @@ test('TC05 - Vérification des totaux d’un avoir', async ({ page }) => {
   await authentifierAdmin(page);
 
   const { numeroFacture, livraison } = await trouverFactureAvecLivraison(page);
-  await expect(page).toHaveURL(/\/admin\/invoices#\d+/, { timeout: 15000 });
+  await expect(page).toHaveURL(/\/admin\/invoices(?:\/list_invoices\/\d+)?(?:#\d+)?/, { timeout: 15000 });
 
   const totalHtFacture = await lireTotalHT(page);
   const totalTvaFacture = await lireMontantRecap(page, /^TVA/i);

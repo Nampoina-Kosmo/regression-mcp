@@ -26,7 +26,7 @@ export async function trouverFactureAvecLivraison(
     const lienFacture = lignes.nth(index).getByRole('link', { name: /^FCT-/ });
     const numeroFacture = (await lienFacture.innerText()).trim();
     await lienFacture.click();
-    await expect(page).toHaveURL(/\/admin\/invoices#\d+/);
+    await expect(page).toHaveURL(/\/admin\/invoices(?:\/list_invoices\/\d+)?(?:#\d+)?/);
     await expect(
       page.getByRole('heading', { name: numeroFacture }).first(),
     ).toBeVisible({ timeout: 15000 });

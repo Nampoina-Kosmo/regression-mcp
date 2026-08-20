@@ -8,6 +8,10 @@ export type DonneesDevis = {
   produit?: string;
 };
 
+export type OptionsCreationDevis = {
+  frais?: Partial<Record<'fee_setup' | 'delivery' | 'financial_expenses' | 'various' | 'retention_charge', boolean>>;
+};
+
 const frais = [
   { nom: 'fee_setup', taux: '1.50%' },
   { nom: 'delivery', taux: '6.00%' },
@@ -19,6 +23,7 @@ const frais = [
 export async function creerDevis(
   page: Page,
   donnees: DonneesDevis,
+  options: OptionsCreationDevis = {},
 ): Promise<string> {
   const entreprise = donnees.entreprise ?? 'ALPHA TEXTIL';
   const attribueA = donnees.attribueA ?? 'Wiem - NACEF -';
@@ -64,7 +69,14 @@ export async function creerDevis(
   });
   await ligneProduit.locator('button[onclick*="add_item_to_table"]').click();
 
-  for (const fraisDevis of frais) {
+  const fraisActifs = frais.filter((fraisDevis) => {
+    if (options.frais && Object.prototype.hasOwnProperty.call(options.frais, fraisDevis.nom)) {
+      return options.frais[fraisDevis.nom] === true;
+    }
+    return true;
+  });
+
+  for (const fraisDevis of fraisActifs) {
     await page.locator(`input[name="${fraisDevis.nom}"]`).fill('100');
     await perdreFocus(page);
     await page.locator(`select[name="${fraisDevis.nom}_taxname"]`).selectOption(fraisDevis.taux);

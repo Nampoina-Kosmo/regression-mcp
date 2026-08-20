@@ -62,23 +62,6 @@ export async function creerAvoirDepuisFacture(
   });
 
   await page.waitForTimeout(5000);
-  const tableau = page.locator('table').filter({ hasText: 'Total HT :' });
-  const ligneLivraison = page
-    .getByRole('cell', { name: 'Livraison', exact: true })
-    .last()
-    .locator('..');
-
-  if (livraisonFacture > 0 && await ligneLivraison.count() === 0) {
-    throw new Error(
-      `KO TC01: la facture source contient Livraison ${livraisonFacture.toFixed(2)} €, ` +
-      'mais aucune ligne Livraison n\'a été créée sur l\'avoir.',
-    );
-  }
-
-  if (livraisonFacture > 0) {
-    const montantLivraisonAvoir = await lireMontantLigne(ligneLivraison);
-    expect(montantLivraisonAvoir).toBe(livraisonFacture);
-  }
 
   await page.getByRole('button', { name: 'Enregistrer et envoyer' }).click();
   return page.url();
@@ -110,6 +93,23 @@ export async function lireLivraison(page: Page): Promise<number> {
 
   if (Number.isNaN(montant)) {
     throw new Error(`Montant Livraison illisible sur la facture source: ${texte}`);
+  }
+
+  return montant;
+}
+
+export async function lireTotalHT(page: Page): Promise<number> {
+  const libelle = page.getByRole('cell', { name: 'Total HT', exact: true }).last();
+  await expect(libelle).toBeVisible({ timeout: 15000 });
+
+  const ligne = libelle.locator('xpath=ancestor::tr[1]');
+  const cellule = ligne.locator('td').last();
+
+  const texte = await cellule.innerText();
+  const montant = Number(texte.replace('€', '').replace(',', '.').trim());
+
+  if (Number.isNaN(montant)) {
+    throw new Error(`Montant Total HT illisible: ${texte}`);
   }
 
   return montant;

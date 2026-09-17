@@ -19,25 +19,27 @@ export async function creerDevisTva20(page: Page, titre: string): Promise<string
   const optionEntreprise = page.getByRole('listbox').getByRole('option', { name: entreprise }).first();
   await expect(optionEntreprise).toBeVisible({ timeout: 15000 });
   await optionEntreprise.click();
+  await page.waitForTimeout(5000);
 
-  const blocContact = page.locator('div').filter({ has: page.getByText('Contact', { exact: true }) }).first();
-  const boutonContact = blocContact.locator('button').filter({ hasText: /Select and Begin Typing/i }).first();
+  const contactWrapper = page.locator('#contact_id_select');
+  const contactDropdown = contactWrapper.locator('.dropdown.bootstrap-select').first();
 
-  if (await boutonContact.count() > 0) {
-    await expect(boutonContact).toBeVisible({ timeout: 15000 });
-    await boutonContact.click();
-
-    const rechercheContact = page.locator('input[type="search"], .bs-searchbox input, input[role="searchbox"], input[role="textbox"]').last();
-    await expect(rechercheContact).toBeVisible({ timeout: 15000 });
-    await rechercheContact.fill('DURAND');
+  if (await contactDropdown.count() > 0) {
+    await expect(contactDropdown).toBeVisible({ timeout: 15000 });
+    await contactDropdown.click();
     await page.waitForTimeout(5000);
 
-    const optionContact = page.locator('li, [role="option"], option').filter({ hasText: /DURAND/i }).first();
+    const rechercheContact = contactWrapper.locator('input[type="text"].form-control[role="textbox"][aria-label="Search"]').first();
+    await expect(rechercheContact).toBeVisible({ timeout: 15000 });
+    await rechercheContact.pressSequentially('PHILIPPE', { delay: 120 });
+    await page.waitForTimeout(5000);
+
+    const optionContact = contactWrapper.locator('.dropdown-menu.inner li a[role="option"]').filter({ hasText: /PHILIPPE/i }).first();
     if (await optionContact.count() > 0) {
       await expect(optionContact).toBeVisible({ timeout: 15000 });
       await optionContact.click();
     } else {
-      const firstVisibleOption = page.locator('li, [role="option"], option').filter({ hasText: /\S/ }).first();
+      const firstVisibleOption = contactWrapper.locator('.dropdown-menu.inner li a[role="option"]').filter({ hasText: /\S/ }).first();
       await expect(firstVisibleOption).toBeVisible({ timeout: 15000 });
       await firstVisibleOption.click();
     }
@@ -88,21 +90,22 @@ export async function creerDevisTva20(page: Page, titre: string): Promise<string
   expect(totalTaxes).toBeGreaterThan(0);
   expect(totalHT + totalTaxes).toBeCloseTo(totalTTC, 2);
 
-  const blocContactFinal = page.locator('div').filter({ has: page.getByText('Contact', { exact: true }) }).first();
-  const boutonContactFinal = blocContactFinal.locator('button').filter({ hasText: /Select and Begin Typing/i }).first();
-  if (await boutonContactFinal.count() > 0) {
-    await boutonContactFinal.click();
-    const rechercheContactFinal = page.locator('input[type="search"], .bs-searchbox input, input[role="searchbox"], input[role="textbox"]').last();
+  const blocContactFinal = page.locator('#contact_id_select');
+  const contactDropdownFinal = blocContactFinal.locator('.dropdown.bootstrap-select').first();
+  if (await contactDropdownFinal.count() > 0) {
+    await contactDropdownFinal.click();
+    await page.waitForTimeout(5000);
+    const rechercheContactFinal = blocContactFinal.locator('input[type="text"].form-control[role="textbox"][aria-label="Search"]').first();
     await expect(rechercheContactFinal).toBeVisible({ timeout: 15000 });
-    await rechercheContactFinal.fill('DURAND');
+    await rechercheContactFinal.pressSequentially('PHILIPPE', { delay: 120 });
     await page.waitForTimeout(3000);
 
-    const optionContactFinal = page.locator('li, [role="option"], option').filter({ hasText: /DURAND/i }).first();
+    const optionContactFinal = blocContactFinal.locator('.dropdown-menu.inner li a[role="option"]').filter({ hasText: /PHILIPPE/i }).first();
     if (await optionContactFinal.count() > 0) {
       await expect(optionContactFinal).toBeVisible({ timeout: 15000 });
       await optionContactFinal.click();
     } else {
-      const firstVisibleOptionFinal = page.locator('li, [role="option"], option').filter({ hasText: /\S/ }).first();
+      const firstVisibleOptionFinal = blocContactFinal.locator('.dropdown-menu.inner li a[role="option"]').filter({ hasText: /\S/ }).first();
       await expect(firstVisibleOptionFinal).toBeVisible({ timeout: 15000 });
       await firstVisibleOptionFinal.click();
     }

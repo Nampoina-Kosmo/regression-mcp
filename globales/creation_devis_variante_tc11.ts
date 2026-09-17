@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function creerDevisTva(page: Page, titre: string, tauxTva: '20.00%' | '10.00%' | '0.00%'): Promise<string> {
+export async function creerDevisTva10(page: Page, titre: string): Promise<string> {
   const entreprise = 'ALPHA TEXTIL';
   const attribueA = 'Wiem - NACEF -';
   const origine = '04 Web';
@@ -71,7 +71,7 @@ export async function creerDevisTva(page: Page, titre: string, tauxTva: '20.00%'
   await expect(optionProduit).toBeVisible({ timeout: 15000 });
   await optionProduit.click();
 
-  await page.getByRole('combobox').filter({ has: page.locator('option', { hasText: tauxTva }) }).first().selectOption({ label: tauxTva });
+  await page.getByRole('combobox').filter({ has: page.locator('option', { hasText: '10.00%' }) }).first().selectOption({ label: '10.00%' });
   await page.getByText('Total HT :', { exact: true }).click();
 
   const ligneProduit = page.locator('tr').filter({
@@ -80,7 +80,7 @@ export async function creerDevisTva(page: Page, titre: string, tauxTva: '20.00%'
   await ligneProduit.locator('button[onclick*="add_item_to_table"]').click();
 
   await page.locator('input[name="delivery"]').fill('100');
-  await page.locator('select[name="delivery_taxname"]').selectOption(tauxTva);
+  await page.locator('select[name="delivery_taxname"]').selectOption('10.00%');
   await page.getByText('Total HT :', { exact: true }).click();
 
   const totalHT = await lireMontant(page, 'Total HT :');
@@ -134,10 +134,6 @@ export async function creerDevisTva(page: Page, titre: string, tauxTva: '20.00%'
   await expect(page).toHaveURL(/\/admin\/proposals\/list_proposals\/\d+/);
 
   return page.url();
-}
-
-export async function creerDevisTva20(page: Page, titre: string): Promise<string> {
-  return creerDevisTva(page, titre, '20.00%');
 }
 
 async function lireMontant(page: Page, libelle: string): Promise<number> {

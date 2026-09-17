@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { authentifierAdmin } from '../globales/authentification';
+import { clearFiltresDevis } from '../globales/clear_filtres_devis';
+import { creerDevisTva20 } from '../globales/creation_devis_variante_tc10';
 import { accepterDevis } from '../globales/conversion_devis_commande';
 import { convertirCommandeEnFacture } from '../globales/conversion_commande_facture';
 import { creerAvoirDepuisFacture, lireLivraison, lireTotalHT } from '../globales/creation_avoir';
-import { creerDevisTva20 } from '../globales/creation_devis_variante_tc10';
 
 async function lireMontantRecap(page: Page, libelle: RegExp): Promise<number> {
   const ligne = page
@@ -24,13 +25,17 @@ async function lireMontantRecap(page: Page, libelle: RegExp): Promise<number> {
   return montant;
 }
 
-test('TC10 - Avoir avec livraison et TVA à 20 %', async ({ page }) => {
+test('TC10 - Création devis variante TVA 20 %', async ({ page }) => {
   test.setTimeout(180000);
   await authentifierAdmin(page);
+
+  await clearFiltresDevis(page);
 
   const titre = `TEST-TC10-${Date.now()}`;
 
   await creerDevisTva20(page, titre);
+
+  await clearFiltresDevis(page);
 
   await accepterDevis(page, { titre });
   await convertirCommandeEnFacture(page, { titreDevis: titre });

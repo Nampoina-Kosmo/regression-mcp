@@ -4,7 +4,7 @@ import { clearFiltresDevis } from '../globales/clear_filtres_devis';
 import { creerDevisTva20 } from '../globales/creation_devis_variante_tc10';
 import { accepterDevis } from '../globales/conversion_devis_commande';
 import { convertirCommandeEnFacture } from '../globales/conversion_commande_facture';
-import { creerAvoirDepuisFacture, lireLivraison, lireTotalHT } from '../globales/creation_avoir';
+import { creerAvoirDepuisFacture, lireLivraison, lireTotalHT } from '../globales/creation_avoir_variante_tc10';
 
 async function lireMontantRecap(page: Page, libelle: RegExp): Promise<number> {
   const ligne = page
@@ -49,11 +49,10 @@ test('TC10 - Création devis variante TVA 20 %', async ({ page }) => {
   const totalTvaFacture = await lireMontantRecap(page, /^TVA/i);
   const totalTtcFacture = await lireMontantRecap(page, /^Total TTC/i);
 
-  expect(livraisonFacture).toBeGreaterThan(0);
+  expect(livraisonFacture).toBe(0);
 
   await creerAvoirDepuisFacture(page, {
     titreDevis: titre,
-    livraisonAttendue: livraisonFacture,
   }, {
     skipInvoiceLookup: true,
   });

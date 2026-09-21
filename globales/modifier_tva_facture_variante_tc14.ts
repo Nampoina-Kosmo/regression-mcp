@@ -34,6 +34,16 @@ export async function modifierDerniereLigneFactureTva15(
     timeout: 15000,
   });
 
+  const identifiantFacture = page.url().match(/\/admin\/invoices\/list_invoices\/(\d+)/)?.[1];
+  if (!identifiantFacture) {
+    throw new Error(`Identifiant de facture introuvable après enregistrement: ${page.url()}`);
+  }
+
+  await page.goto(`/admin/invoices/list_invoices/${identifiantFacture}`);
+  await expect(page.getByRole('heading', { name: /^FCT-/ }).first()).toBeVisible({
+    timeout: 15000,
+  });
+
   return page.url();
 }
 

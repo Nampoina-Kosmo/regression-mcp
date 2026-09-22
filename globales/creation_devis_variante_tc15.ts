@@ -9,7 +9,10 @@ export async function creerDevisTvaMixteTc15(page: Page, titre: string): Promise
   await page.goto('/admin/proposals/proposal');
   await page.getByRole('textbox', { name: /\*? Titre/ }).fill(titre);
 
-  await page.getByRole('button', { name: 'Sélectionner et commencer à écrire' }).click();
+  await page
+    .locator('#rel_id_select')
+    .getByRole('button', { name: 'Sélectionner et commencer à écrire' })
+    .click();
 
   const rechercheEntreprise = page.getByRole('textbox', { name: 'Search' }).last();
   await expect(rechercheEntreprise).toBeVisible({ timeout: 15000 });
@@ -62,33 +65,46 @@ export async function creerDevisTvaMixteTc15(page: Page, titre: string): Promise
   await expect(optionOrigine).toBeVisible({ timeout: 10000 });
   await optionOrigine.click();
 
-  await page.getByRole('button', { name: 'Ajouter un produit' }).click();
-
   const produits = [
     { nom: 'Cartes de Visite', tva: '20.00%' },
     { nom: 'Cartes de Visite', tva: '10.00%' },
-    { nom: 'Cartes de Visite', tva: '0.00%' },
+    { nom: 'Cartes de Visite', tva: '1.50%' },
   ];
 
   for (const produit of produits) {
+    // Ciblé par data-id plutôt que par son libellé : une fois un produit choisi, ce bouton
+    // affiche le nom de ce produit au lieu du texte "Ajouter un produit", donc un sélecteur
+    // basé sur ce texte ne matche plus dès la 2e ligne.
+    const boutonAjouterProduit = page.locator('button[data-id="item_select"]');
+    await expect(boutonAjouterProduit).toBeVisible({ timeout: 15000 });
+    await boutonAjouterProduit.click();
+    await page.waitForTimeout(5000);
+
     const rechercheProduit = page.getByRole('textbox', { name: 'Search' });
+    await expect(rechercheProduit).toBeVisible({ timeout: 15000 });
     await rechercheProduit.pressSequentially(produit.nom, { delay: 120 });
+    await page.waitForTimeout(5000);
 
     const optionProduit = page.getByRole('listbox').getByRole('option', {
       name: new RegExp(produit.nom, 'i'),
     }).first();
     await expect(optionProduit).toBeVisible({ timeout: 15000 });
     await optionProduit.click();
+    await page.waitForTimeout(5000);
 
     await page.getByRole('combobox').filter({
       has: page.locator('option', { hasText: produit.tva }),
     }).first().selectOption({ label: produit.tva });
     await page.getByText('Total HT :', { exact: true }).click();
+    await page.waitForTimeout(5000);
 
-    const ligneProduit = page.locator('tr').filter({
-      has: page.getByRole('textbox', { name: "Désignation de l'produit" }),
-    }).last();
-    await ligneProduit.locator('button[onclick*="add_item_to_table"]').click();
+    // Bouton de confirmation (icône check) de la ligne produit en cours de saisie.
+    // Il n'existe qu'une seule occurrence à la fois dans le DOM (la ligne de saisie),
+    // donc pas besoin de le rechercher via une ligne parente.
+    const boutonConfirmerLigne = page.locator('button[onclick*="add_item_to_table"]');
+    await expect(boutonConfirmerLigne).toBeVisible({ timeout: 15000 });
+    await boutonConfirmerLigne.click();
+    await page.waitForTimeout(5000);
   }
 
   await page.locator('input[name="delivery"]').fill('100');
